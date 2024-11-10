@@ -1,68 +1,39 @@
+# models/model.py
 import random
 from models.agents import CovidAgent
 
 class CovidModel:
-    def __init__(self, num_agents, config):
+    def __init__(self, config):
+        self.config = config
+        self.grid_size = 10  # Tamaño de la cuadrícula, se puede ajustar
         self.agents = []
-        self.grid = self.initialize_grid(config["grid_size"])
-        self.infection_radius = config["infection_radius"]
-        for _ in range(num_agents):
-            print("Creando agente")
-            agent = CovidAgent(
-                age=random.choice(config["ages"]),
-                activity=random.choice(config["activities"]),
-                mobility=random.choice(config["mobilities"]),
-                awareness=random.choice(config["awareness_levels"]),
-                health=random.choice(config["health_statuses"]),
-                purchasing_power=random.choice(config["purchasing_power"])
-            )
-            print("Agente creado", agent)
-            self.agents.append(agent)
+        self.grid = self.initialize_grid(self.grid_size)
+        self.history = []  # Para almacenar el historial de los estados de los agentes
+        self.initialize_agents(config)
 
-    def initialize_grid(self, grid_size):
-        print("Inicializando cuadrícula")
-        # Inicializar la cuadrícula de simulación
-        return [[None for _ in range(grid_size)] for _ in range(grid_size)]
+    def initialize_grid(self, size):
+        return [[None for _ in range(size)] for _ in range(size)]
+
+    def initialize_agents(self, config):
+        for i in range(config["agents"]):
+            agent = CovidAgent(i, config)
+            self.agents.append(agent)
+            # Inicialización de los agentes infectados
+            if i < config["infected"]:
+                agent.state = "Infectious"
+                agent.infected = True
 
     def step(self):
-        # Un ciclo de simulación
-        print("Ejecutando ciclo de simulación",self.agents.count)
+        """Realiza un ciclo de simulación, actualizando el estado de los agentes."""
         for agent in self.agents:
-            if agent.state == "Susceptible":
-                infection_probability = agent.calculate_infection_probability()
-                if random.random() < infection_probability:
-                    agent.state = "Exposed"
-            elif agent.state == "Exposed":
-                agent.state = "Infectious"
-                agent.calculate_recovery_time()
-                agent.calculate_mortality_rate()
-            elif agent.state == "Infectious":
-                if agent.recovery_time <= 0:
-                    if random.random() < agent.mortality_rate:
-                        agent.state = "Deceased"
-                    else:
-                        agent.state = "Recovered"
-                else:
-                    agent.recovery_time -= 1
-        # for agent in self.agents:
-        #     print("Calculando probabilidad de infección de agente... ", format(agent)) 
-        #     infection_probability = agent.calculate_infection_probability()
-        #     recovery_time = agent.calculate_recovery_time()
-        #     mortality_rate = agent.calculate_mortality_rate()
-        #     if agent.state == "Susceptible" and random.random() < infection_probability:
-        #         agent.state = "Exposed"
-        #     elif agent.state == "Exposed":
-        #         agent.state = "Infectious"
-        #     elif agent.state == "Infectious" and recovery_time <= 0:
-        #         if random.random() < mortality_rate:
-        #             agent.state = "Deceased"
-        #         else:
-        #             agent.state = "Recovered"
-        #     elif agent.state == "Infectious":
-        #         agent.recovery_time -= 1
-            # Lógica para contagiar a los agentes cercanos
+            agent.move()
+            agent.update_state()
+
+        self.history.append([agent.get_state() for agent in self.agents])
+
+    def count_state(self, state):
+        """Cuenta cuántos agentes están en un estado determinado."""
+        return sum(1 for agent in self.agents if agent.state == state)
+
     def get_results(self):
-        results = []
-        for agent in self.agents:
-            results.append(agent.get_state())  # Suponiendo que cada agente tiene un método get_state()
-        return results
+        return self.history
