@@ -1,11 +1,36 @@
 num_agents: 50
+initial_infected_agents: 5
 steps: 50
 grid_size: 10
 infection_radius: 2
 
+# Parámetros ajustables
+infection_probability_min: 0.01
+infection_probability_max: 0.45
+recovery_days_min: 5
+recovery_days_max: 14
+mortality_rate_min: 0.01
+mortality_rate_max: 0.1
+
+# Parámetros de distribución
 ages: [1, 2, 3, 4]
 activities: [75.39, 62.98, 59.13, 58.71, 54.12, 52.07]
 mobilities: [20, 60, 40]
 awareness_levels: [60, 40, 20]
 health_statuses: [30, 25, 45, 50]
 purchasing_power: [60, 55, 50, 45, 40, 35, 32, 30]
+
+
+# num_agents: 50
+# steps: 50
+# grid_size: 10
+# infection_radius: 2
+
+# ages: [1, 2, 3, 4]
+# activities: [75.39, 62.98, 59.13, 58.71, 54.12, 52.07]
+# mobilities: [20, 60, 40]
+# awareness_levels: [60, 40, 20]
+# health_statuses: [30, 25, 45, 50]
+# purchasing_power: [60, 55, 50, 45, 40, 35, 32, 30]
+
+# infection_probability_range: 0.45
